@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
+from fastapi.middleware.cors import CORSMiddleware
 import sentry_sdk
 from sqlalchemy import text
 from app.router.routers import routers
@@ -31,6 +32,19 @@ class AppCreator():
             redoc_url="/redoc",
             openapi_url="/openapi.json",
             swagger_ui_parameters={"persistAuthorization": True}
+        )
+
+        allowed_origins = [
+            "https://enmamar.com",
+            "https://enmamarmain.netlify.app"
+        ]
+
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=allowed_origins,
+            allow_credentials=True,
+            allow_methods=["*"],  # You can restrict this further
+            allow_headers=["*"],  # You can restrict this too
         )
 
         self.app.include_router(routers)
