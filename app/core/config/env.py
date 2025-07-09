@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     SMS_TOKEN: str
     SMS_ID: str
+    SMS_EXPIRATION_SECONDS: int
     CHAPA_PUBLIC_KEY: str
     CHAPA_SECRET_KEY: str   
     CHAPA_ENCRIPTION_KEY: str

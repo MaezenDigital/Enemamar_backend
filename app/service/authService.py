@@ -20,21 +20,22 @@ class AuthService:
 
     def signUp(self, sign_up_data: signUp):
         # Validate and normalize phone number
-        regex = r'^(?:\+251|0)?9\d{8}$'
+        regex = r'^(?:\+251|0)?[79]\d{8}$'
         if not re.match(regex, sign_up_data.phone_number):
             raise ValidationError(detail="Invalid phone number")
 
         # Normalize phone number to raw form (e.g., 966934381)
         sign_up_data.phone_number = normalize_phone_number(sign_up_data.phone_number)
 
+        self.verify_otp(sign_up_data.phone_number, sign_up_data.otp)
         # Convert sign_up_data to User ORM object
-        user_obj = User(**sign_up_data.model_dump(exclude_none=True))
+        user_obj = User(**sign_up_data.model_dump(exclude_none=True, exclude={'otp'}))
 
         user_obj.role = "user"  # Default role for new users
 
         # Hash the password
         user_obj.password = hash_password(user_obj.password)
-
+        user_obj.is_active = True  # Set user as active by default
         # Check for duplicate entry using database constraints
         # Create user in repository and handle errors
         user, err = self.user_repo.create_user(user_obj)
@@ -143,19 +144,20 @@ class AuthService:
             raise ValidationError(detail="Error verifying OTP via SMS provider", data=str(e))
         
         if status_code == 200:
-            # Normalize phone number to raw form (e.g., 966934381)
-            phone_number = normalize_phone_number(formatted_phone_number)
-            # phone_number = re.sub(r'^(?:\+251|0)', '', phone_number)
+            pass
+            # # Normalize phone number to raw form (e.g., 966934381)
+            # phone_number = normalize_phone_number(formatted_phone_number)
+            # # phone_number = re.sub(r'^(?:\+251|0)', '', phone_number)
                         
-            # Activate the user
-            print("Normalized phone number:", phone_number)
-            user, err = self.user_repo.activate_user(None, phone_number)
-            if err:
-                raise ValidationError(detail="Error activating user after OTP", data=str(err))
-            if not user:
-                raise NotFoundError(detail="User with this phone number does not exist")
+            # # Activate the user
+            # print("Normalized phone number:", phone_number)
+            # user, err = self.user_repo.activate_user(None, phone_number)
+            # if err:
+            #     raise ValidationError(detail="Error activating user after OTP", data=str(err))
+            # if not user:
+            #     raise NotFoundError(detail="User with this phone number does not exist")
             
-            return {"detail": "OTP verified successfully", "status_code": status_code}
+            # return {"detail": "OTP verified successfully", "status_code": status_code}
         
         else:
             # decode bytes→JSON or utf-8, else leave as is

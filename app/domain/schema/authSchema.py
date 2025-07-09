@@ -33,6 +33,11 @@ class signUp(BaseModel):
         description="User role (student, instructor, admin)",
         examples=["student"]
     )
+    otp: str = Field(
+        ...,
+        description="One-time password for verification",
+        examples=["123456"]
+    )
 
     model_config = {
         "from_attributes": True,
@@ -42,7 +47,7 @@ class signUp(BaseModel):
                 "first_name": "John",
                 "last_name": "Doe",
                 "phone_number": "0912345678",
-                "role": "student"
+                "otp": "123456"
             }
         }
     }

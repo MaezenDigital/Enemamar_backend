@@ -21,9 +21,9 @@ def send_otp_sms(phone_number: str):
     to = phone_number
     pre = " Hello, your OTP is: " 
     post = " Thank you for using our service."
-    sb = 0
-    sa = 0
-    ttl = 100
+    sb = 1
+    sa = 1
+    ttl = setting.SMS_EXPIRATION_SECONDS  # expiration time in seconds
     len = 6
     t = 0
     # final url
