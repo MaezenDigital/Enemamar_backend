@@ -28,21 +28,6 @@ course_router = APIRouter(
     status_code=status.HTTP_200_OK,
     summary="Get all courses",
     description="Retrieve a paginated list of all available courses with optional filtering and search.",
-    # responses={
-    #     200: {
-    #         "description": "List of courses retrieved successfully",
-    #         "model": CourseListResponse
-    #     },
-    #     404: {
-    #         "description": "No courses found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "No courses found"}
-    #             }
-    #         }
-    #     }
-    # }
 )
 async def get_courses(
     search_params: SearchParams = Depends(),
@@ -72,30 +57,7 @@ async def get_courses(
     status_code=status.HTTP_200_OK,
     summary="Get enrolled courses",
     description="Retrieve a paginated list of courses enrolled by the current user.",
-    # responses={
-    #     200: {
-    #         "description": "Enrolled courses retrieved successfully",
-    #         "model": CourseListResponse
-    #     },
-    #     401: {
-    #         "description": "Unauthorized",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Missing or invalid token"}
-    #             }
-    #         }
-    #     },
-    #     404: {
-    #         "description": "No enrolled courses found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "No enrolled courses found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def get_enrolled_courses(
     search_params: SearchParams = Depends(),
@@ -130,39 +92,7 @@ async def get_enrolled_courses(
     status_code=status.HTTP_201_CREATED,
     summary="Enroll in a course",
     description="Enroll the current user in a specific course.",
-    # responses={
-    #     201: {
-    #         "description": "Successfully enrolled in course",
-    #         "model": EnrollmentResponseModel
-    #     },
-    #     400: {
-    #         "description": "Bad request",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Already enrolled in this course"}
-    #             }
-    #         }
-    #     },
-    #     401: {
-    #         "description": "Unauthorized",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Missing or invalid token"}
-    #             }
-    #         }
-    #     },
-    #     404: {
-    #         "description": "Not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Course not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def enroll_course(
     course_id: str,
@@ -191,44 +121,7 @@ async def enroll_course(
     status_code=status.HTTP_200_OK,
     summary="Unenroll from a course",
     description="Unenroll the current user from a specific course.",
-    # responses={
-    #     200: {
-    #         "description": "Successfully unenrolled from course",
-    #         "model": BaseResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Successfully unenrolled from course"}
-    #             }
-    #         }
-    #     },
-    #     400: {
-    #         "description": "Bad request",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Not enrolled in this course"}
-    #             }
-    #         }
-    #     },
-    #     401: {
-    #         "description": "Unauthorized",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Missing or invalid token"}
-    #             }
-    #         }
-    #     },
-    #     404: {
-    #         "description": "Not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Course not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def unenroll_course(
     course_id: str,
@@ -257,21 +150,7 @@ async def unenroll_course(
     status_code=status.HTTP_200_OK,
     summary="Get course by ID",
     description="Retrieve detailed information about a specific course by its ID.",
-    # responses={
-    #     200: {
-    #         "description": "Course retrieved successfully",
-    #         "model": CourseDetailResponse
-    #     },
-    #     404: {
-    #         "description": "Course not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Course not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def get_course(
     course_id: str,
@@ -285,7 +164,8 @@ async def get_course(
 
     - **course_id**: UUID of the course to retrieve
     """
-    course_response = course_service.getCourse(course_id)
+    is_admin = False  # Default to false, can be set to true if needed
+    course_response = course_service.getCourse(course_id, is_admin)
     return course_response
 
 @course_router.get(

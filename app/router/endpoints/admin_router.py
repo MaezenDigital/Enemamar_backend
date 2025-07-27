@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile, status
 from app.domain.schema.authSchema import UpdateRoleRequest
 from app.domain.schema.courseSchema import (
     CourseInput,
@@ -159,6 +159,30 @@ async def add_thumbnail_to_course(
     Add a thumbnail to a course.
     """
     return course_service.addThumbnail(course_id, thumbnail, thumbnail_name)
+
+@admin_router.get(
+    "/courses/{course_id}",
+    # response_model=CourseDetailResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get course by ID",
+    description="Retrieve detailed information about a specific course by its ID.",
+    
+)
+async def get_course(
+    course_id: str,
+    course_service: CourseService = Depends(get_course_service)
+):
+    """
+    Retrieve detailed information about a specific course.
+
+    This endpoint returns comprehensive details about a course, including its lessons,
+    instructor information, pricing, and other metadata.
+
+    - **course_id**: UUID of the course to retrieve
+    """
+    is_admin = True
+    course_response = course_service.getCourse(course_id, is_admin)
+    return course_response
 
 @admin_router.put("/courses/{course_id}")
 async def update_course(

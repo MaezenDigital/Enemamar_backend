@@ -39,6 +39,6 @@ class Settings(BaseSettings):
 
 def get_settings():
     settings = Settings()
-    print("Loading settings from environment variables...")
-    pprint(settings.model_dump())
+    # print("Loading settings from environment variables...")
+    # pprint(settings.model_dump())
     return settings

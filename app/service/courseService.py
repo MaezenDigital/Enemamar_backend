@@ -174,7 +174,7 @@ class CourseService:
 
 
 
-    def getCourse(self, course_id: str):
+    def getCourse(self, course_id: str, is_admin):
         """
         Retrieve a course by its ID.
 
@@ -197,8 +197,12 @@ class CourseService:
             raise ValidationError(detail="Failed to retrieve course", data=str(err))
         if not course:
             raise ValidationError(detail="Course not found")
-
+        
         course_response = CourseResponse.model_validate(course)
+        if not is_admin:
+            for i in range(len(course_response.lessons)):
+                course_response.lessons[i].video = None
+        
         return {"detail": "course fetched successfully", "data": course_response}
 
     def getCourses(self, page: int = 1, page_size: int = 10, search: Optional[str] = None, filter: Optional[str] = None):
