@@ -156,7 +156,7 @@ class LessonService:
 
             url = generate_secure_bunny_stream_url(library_id, video_id, secret_key)
             lesson_response.video_url = url
-
+        lesson_response.video = None
         return {
             "detail": "Lesson fetched successfully",
             "data": lesson_response
