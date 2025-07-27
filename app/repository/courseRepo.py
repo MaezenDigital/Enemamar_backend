@@ -6,6 +6,7 @@ from sqlalchemy import or_, func
 from typing import Tuple, Optional, Any, List
 from app.repository.payment_repo import PaymentRepository
 from app.repository.lesson_repo import LessonRepository
+from math import ceil
 
 def _wrap_return(result: Any) -> Tuple[Any, None]:
     return result, None
@@ -73,7 +74,7 @@ class CourseRepository:
             if not course:
                 return None, NotFoundError(detail="Course not found")
             if course.discount and course.discount>0:
-                course.price = course.price - (course.price * course.discount / 100)
+                course.price = ceil(course.price - (course.price * course.discount / 100))
             return _wrap_return(course)
         except Exception as e:
             return _wrap_error(e)

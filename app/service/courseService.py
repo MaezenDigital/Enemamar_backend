@@ -25,7 +25,7 @@ from app.utils.bunny.bunnyStorage import BunnyCDNStorage
 from app.core.config.env import get_settings
 import os
 from tempfile import NamedTemporaryFile
-
+from math import ceil
 
 settings = get_settings()
 class CourseService:
@@ -224,7 +224,7 @@ class CourseService:
 
         for course in courses:
             if course.discount and course.discount>0:
-                course.price = course.price - (course.price * course.discount/100)
+                course.price = ceil(course.price - (course.price * course.discount/100))
 
         courses_response = [
             CourseResponse.model_validate(course).model_dump(exclude={'lessons'})

@@ -65,10 +65,10 @@ class PaymentService:
             callback = f"{settings.BASE_URL}/payment/callback"
 
             tx_ref = generete_tx_ref(12)
-            if course.discount:
-                amount = course.price - ((course.discount/100) * course.price)
-            else:
-                amount = course.price
+            # if course.discount:
+            #     amount = course.price - ((course.discount/100) * course.price)
+            # else:
+            amount = course.price
 
             data = PaymentData(
                 tx_ref=tx_ref,
