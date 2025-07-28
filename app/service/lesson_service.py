@@ -125,7 +125,6 @@ class LessonService:
             raise ValidationError(detail="Lesson ID is required")
 
         lesson, err = self.lesson_repo.get_lesson_by_id(course_id, lesson_id)
-        print(f"Lesson order: {lesson.order}, Error: {err}")
         
         if err:
             if isinstance(err, NotFoundError):
@@ -134,6 +133,7 @@ class LessonService:
         if not lesson:
             raise ValidationError(detail="Lesson not found")
         
+        print(f"Lesson order: {lesson.order}, Error: {err}")
         if lesson.order != 1:
             if not user_id or user_id == "":
                 raise ValidationError("The lesson is not the first lesson")
