@@ -36,7 +36,10 @@ class AppCreator():
 
         allowed_origins = [
             "https://enmamar.com",
-            "https://enmamarmain.netlify.app"
+            "https://enmamarmain.netlify.app",
+            "https://checkout.chapa.co/",
+            "https://chapa.co",
+            "https://api.chapa.co",
         ]
 
         self.app.add_middleware(
