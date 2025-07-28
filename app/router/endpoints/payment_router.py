@@ -46,7 +46,7 @@ async def initiate_payment(
 
 @payment_router.get("/callback")
 async def payment_callback(
-    callback: str,
+    # callback: str,
     trx_ref: str,
     status: str,
     payment_service: PaymentService = Depends(get_payment_service)
@@ -63,8 +63,8 @@ async def payment_callback(
     Returns:
         dict: The enrollment response.
     """
-    print(f"Callback: {callback}")
-    payload = CallbackPayload(trx_ref=trx_ref, ref_id=callback, status=status) 
+    # print(f"Callback: {callback}")
+    payload = CallbackPayload(trx_ref=trx_ref, status=status) 
     return payment_service.process_payment_callback(payload)
 
 @protected_payment_router.get("/user/{user_id}")

@@ -144,8 +144,10 @@ class PaymentService:
         except Exception as e:
             raise ValidationError(detail="Payment verification failed")
 
+        print(response["data"]["reference"])
+        
         if response["status"] != "success":
-            _, err = self.payment_repo.update_payment(payload.trx_ref, "failed", ref_id=payload.ref_id)
+            _, err = self.payment_repo.update_payment(payload.trx_ref, "failed", ref_id=response["data"]["reference"])
             if err:
                 raise ValidationError(detail="Error updating payment status to failed", data=str(err))
             raise ValidationError(detail="Payment failed")

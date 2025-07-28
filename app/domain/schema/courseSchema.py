@@ -206,7 +206,7 @@ class PaymentData(BaseModel):
 
 class CallbackPayload(BaseModel):
     trx_ref: str
-    ref_id: str
+    ref_id: Optional[str] = None
     status: str
 
 class PaginationParams(BaseModel):
