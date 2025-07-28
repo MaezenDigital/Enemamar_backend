@@ -126,15 +126,20 @@ class LessonService:
 
         lesson, err = self.lesson_repo.get_lesson_by_id(course_id, lesson_id)
         print(f"Lesson order: {lesson.order}, Error: {err}")
-        if lesson.order != 1:
-            self.check_lesson_access(course_id, user_id)
-
+        
         if err:
             if isinstance(err, NotFoundError):
                 raise ValidationError(detail="Lesson not found")
             raise ValidationError(detail="Failed to retrieve lesson", data=str(err))
         if not lesson:
             raise ValidationError(detail="Lesson not found")
+        
+        if lesson.order != 1:
+            if not user_id or user_id == "":
+                raise ValidationError("The lesson is not the first lesson")
+            else:
+                self.check_lesson_access(course_id, user_id)
+
 
         lesson_response = LessonResponse.model_validate(lesson)
 

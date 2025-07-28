@@ -247,21 +247,7 @@ async def get_instructor_courses_analytics(
     status_code=status.HTTP_200_OK,
     summary="Get courses by instructor",
     description="Retrieve a list of courses taught by a specific instructor.",
-    # responses={
-    #     200: {
-    #         "description": "Instructor courses retrieved successfully",
-    #         "model": CourseListResponse
-    #     },
-    #     404: {
-    #         "description": "Instructor not found or has no courses",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "No courses found for this instructor"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def get_courses_by_instructor(
     instructor_id: str,
@@ -333,39 +319,7 @@ async def get_all_courses_analytics(
     status_code=status.HTTP_200_OK,
     summary="Get course analysis",
     description="Retrieve analytics and statistics for a specific course with optional time filtering.",
-    # responses={
-    #     200: {
-    #         "description": "Course analysis retrieved successfully",
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {
-    #                     "detail": "Course analysis retrieved successfully",
-    #                     "data": {
-    #                         "course_id": "123e4567-e89b-12d3-a456-426614174000",
-    #                         "total_enrollments": 150,
-    #                         "completion_rate": 0.75,
-    #                         "average_rating": 4.5,
-    #                         "revenue": 14925.50,
-    #                         "enrollment_trend": [
-    #                             {"date": "2023-01", "count": 25},
-    #                             {"date": "2023-02", "count": 35},
-    #                             {"date": "2023-03", "count": 45}
-    #                         ]
-    #                     }
-    #                 }
-    #             }
-    #         }
-    #     },
-    #     404: {
-    #         "description": "Course not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Course not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def get_courses_analysis(
     course_id: str,

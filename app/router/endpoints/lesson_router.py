@@ -128,60 +128,7 @@ async def get_lessons(
     status_code=status.HTTP_200_OK,
     summary="Get lesson by ID",
     description="Retrieve detailed information about a specific lesson with generated video URL.",
-    # responses={
-    #     200: {
-    #         "description": "Lesson retrieved successfully",
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {
-    #                     "detail": "Lesson fetched successfully",
-    #                     "data": {
-    #                         "id": "8d854347-ba90-422d-901e-2752ba47a6f1",
-    #                         "title": "Introduction to Python",
-    #                         "description": "Learn the basics of Python programming",
-    #                         "duration": 30,
-    #                         "video_url": "https://iframe.mediadelivery.net/embed/393657/3e52de58-dc2b-4269-a0f5-f181f004964a?token=37430fd202c1738a588a156ae76278c4fd88ece01bea21cc47f2abf83e88ead5&expires=1746350479",
-    #                         "order": 1,
-    #                         "created_at": "2025-05-04T10:57:36.144121+03:00",
-    #                         "updated_at": None,
-    #                         "video": {
-    #                             "id": "0b98bfd7-2460-4e08-a37c-725e14c497bb",
-    #                             "video_id": "3e52de58-dc2b-4269-a0f5-f181f004964a",
-    #                             "library_id": "393657",
-    #                             "secret_key": "gAAAAABoFx3wyLT5UwPjdYwbe_HJY4T0MmPzyq-BDPvkdoH-rZi1JlYvuN3fQH2sRFhH06tJaeyZUplI1hefW-VWmrcobjBUouW8B6njxpiN7WP4_2P5Q90BLeI5_mYt3OnF6WnPATO2",
-    #                             "created_at": "2025-05-04T10:57:36.152502+03:00",
-    #                             "updated_at": "2025-05-04T10:57:36.152502+03:00"
-    #                         }
-    #                     }
-    #                 }
-    #             }
-    #         }
-    #     },
-    #     401: {
-    #         "description": "Unauthorized",
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Missing or invalid token"}
-    #             }
-    #         }
-    #     },
-    #     403: {
-    #         "description": "Forbidden",
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Not enrolled in this course"}
-    #             }
-    #         }
-    #     },
-    #     404: {
-    #         "description": "Not found",
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Lesson not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def get_lesson_by_id(
     course_id: str,
@@ -204,6 +151,33 @@ async def get_lesson_by_id(
     user_id = decoded_token.get("id")
     return lesson_service.get_lesson_by_id(course_id, lesson_id, user_id)
 
+@lesson_router.get(
+    "/{course_id}/{lesson_id}/first",
+    # response_model=LessonDetailResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get lesson by ID",
+    description="Retrieve detailed information about a first oreder lesson with generated video URL.",
+    
+)
+async def get_lesson_by_id(
+    course_id: str,
+    lesson_id: str,
+    lesson_service: LessonService = Depends(get_lesson_service)
+):
+    """
+    Retrieve detailed information about a specific lesson.
+
+    This endpoint returns comprehensive details about a lesson, including its content,
+    video URL (if available), and other metadata. The user must be enrolled in the course
+    to access its lessons.
+
+    - **course_id**: UUID of the course containing the lesson
+    - **lesson_id**: UUID of the lesson to retrieve
+
+    Authentication is required via JWT token in the Authorization header.
+    """
+    user_id = ""
+    return lesson_service.get_lesson_by_id(course_id, lesson_id, user_id)
 
 @protected_lesson_router.delete(
     "/videos/{video_id}",
