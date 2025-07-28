@@ -516,7 +516,7 @@ async def get_lesson_video(
     Note: This endpoint is for administrative purposes. To get a lesson with its
     generated video URL, use the regular lesson retrieval endpoint.
     """
-    return lesson_service.get_lesson_video(course_id, lesson_id)
+    return lesson_service.get_lesson_video(lesson_id)
 
 @protected_lesson_router.put(
     "/{course_id}/{lesson_id}",

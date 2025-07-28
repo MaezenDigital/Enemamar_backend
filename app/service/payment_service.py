@@ -1,8 +1,10 @@
+import json
 from app.utils.exceptions.exceptions import ValidationError, NotFoundError
 from app.domain.schema.courseSchema import (
     PaymentData,
     PaymentResponse,
     CallbackPayload,
+    CourseResponse,
 )
 from app.domain.model.course import Payment
 from app.repository.payment_repo import PaymentRepository
@@ -49,6 +51,8 @@ class PaymentService:
             raise ValidationError(detail="Admins cannot enroll in courses")
         # Validate course exists
         course, err = self.course_repo.get_course(course_id)
+
+        course_dto = CourseResponse.model_validate(course)
         if err:
             raise ValidationError(detail="Error fetching course", data=str(err))
         if not course:
@@ -61,14 +65,14 @@ class PaymentService:
         if enrollment:
             raise ValidationError(detail="User already enrolled in course")
 
-        if course.price > 0:
+        if course_dto.price > 0:
             callback = f"{settings.BASE_URL}/payment/callback"
 
             tx_ref = generete_tx_ref(12)
-            # if course.discount:
-            #     amount = course.price - ((course.discount/100) * course.price)
-            # else:
-            amount = course.price
+            amount = course_dto.price
+            
+            if course_dto.discount:
+                amount = course_dto.price - ((course_dto.discount/100) * course_dto.price)
 
             data = PaymentData(
                 tx_ref=tx_ref,
@@ -145,7 +149,7 @@ class PaymentService:
             raise ValidationError(detail="Payment verification failed")
 
         print(response["data"]["reference"])
-        
+
         if response["status"] != "success":
             _, err = self.payment_repo.update_payment(payload.trx_ref, "failed", ref_id=response["data"]["reference"])
             if err:
@@ -177,20 +181,31 @@ class PaymentService:
         # Enroll course
         enrollment, err = self.course_repo.enroll_course(user.id, course.id)
         
+        if err:
+            raise ValidationError(detail="Error enrolling course", data=str(err))
+        if not enrollment:
+            raise ValidationError(detail="Error enrolling course")
 
         try:
             message = f"You have successfully enrolled in {course.title}. Thank you for choosing our platform!"
             phone_number = f"0{user.phone_number}"
             print("Sending SMS to:", phone_number)
             print("Message:", message)
-            send_sms(phone_number, message)
+            status_code, content = send_sms(phone_number, message)
+
+            print("SMS Status Code:", status_code)
+            if status_code != 200:
+                content_decoded = content
+                if isinstance(content, (bytes, bytearray)):
+                    try:
+                        content_decoded = json.loads(content)
+                    except Exception:
+                        content_decoded = content.decode("utf-8", errors="ignore")
+                print("Error sending SMS:", content_decoded)
+
         except Exception as e:
             print("Error sending SMS:", e)
 
-        if err:
-            raise ValidationError(detail="Error enrolling course", data=str(err))
-        if not enrollment:
-            raise ValidationError(detail="Error enrolling course")
 
         # Convert SQLAlchemy Enrollment object to Pydantic Response Model
         enrollment_response = EnrollmentResponse.model_validate(enrollment)

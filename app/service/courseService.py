@@ -80,6 +80,7 @@ class CourseService:
         if not created_course:
             raise ValidationError(detail="Failed to fetch course with lessons")
         course_response = CourseResponse.model_validate(created_course)
+        
 
         return {
             "detail": "Course created successfully",
@@ -199,6 +200,9 @@ class CourseService:
             raise ValidationError(detail="Course not found")
         
         course_response = CourseResponse.model_validate(course)
+        if course_response.discount and course_response.discount > 0:
+            course_response.price = ceil(course_response.price - (course_response.price * course_response.discount / 100))
+        
         if not is_admin:
             for i in range(len(course_response.lessons)):
                 course_response.lessons[i].video = None
@@ -222,14 +226,16 @@ class CourseService:
         if err:
             raise ValidationError(detail="Failed to retrieve courses", data=str(err))
 
-        for course in courses:
-            if course.discount and course.discount>0:
-                course.price = ceil(course.price - (course.price * course.discount/100))
 
         courses_response = [
             CourseResponse.model_validate(course).model_dump(exclude={'lessons'})
             for course in courses
         ]
+        
+        for course in courses_response:
+            # print(course)
+            if course.get("discount") and course["discount"] > 0:
+                course["price"] = ceil(course["price"] - (course["price"] * course["discount"] / 100))
 
         total_count, err = self.course_repo.get_total_courses_count(search, filter)
         if err:

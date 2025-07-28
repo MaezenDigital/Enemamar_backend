@@ -73,8 +73,7 @@ class CourseRepository:
             )
             if not course:
                 return None, NotFoundError(detail="Course not found")
-            if course.discount and course.discount>0:
-                course.price = ceil(course.price - (course.price * course.discount / 100))
+            
             return _wrap_return(course)
         except Exception as e:
             return _wrap_error(e)
