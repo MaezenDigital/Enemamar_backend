@@ -17,7 +17,7 @@ def send_otp_sms(phone_number: str):
     # request parameters
     callback = ""
     form_id = setting.SMS_ID
-    sender = ""
+    sender = setting.SMS_SENDER_NAME
     to = phone_number
     pre = " Hello, your OTP is: " 
     post = " Thank you for using our service."
@@ -96,8 +96,10 @@ def send_sms(phone_number: str, message: str):
     # request parameters
     to = phone_number
     text = message
+    from_id = setting.SMS_ID  # sender ID, can be empty
+    sender = setting.SMS_SENDER_NAME  # sender name, can be empty
     # final url
-    url = f"{base_url}?to={to}&message={text}"
+    url = f"{base_url}?from={from_id}&send={sender}&to={to}&message={text}"
     # make request
     try:
         result = session.get(url, headers=headers)

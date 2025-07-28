@@ -19,32 +19,6 @@ auth_router = APIRouter(
     status_code=status.HTTP_200_OK,
     summary="Send OTP",
     description="Send a one-time password (OTP) to the provided phone number for verification.",
-    # responses={
-    #     200: {
-    #         "description": "OTP sent successfully",
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "OTP sent successfully"}
-    #             }
-    #         }
-    #     },
-    #     400: {
-    #         "description": "Bad request",
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Invalid phone number format"}
-    #             }
-    #         }
-    #     },
-    #     500: {
-    #         "description": "Internal server error",
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Failed to send OTP"}
-    #             }
-    #         }
-    #     }
-    # }
 )
 async def send_otp(phone_number: str, auth_service: AuthService = Depends(get_auth_service)):
     """
