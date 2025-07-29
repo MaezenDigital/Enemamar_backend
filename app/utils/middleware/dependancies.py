@@ -1,6 +1,7 @@
 from fastapi import Depends, HTTPException, Header, Request
 from app.utils.security.jwt_handler import verify_access_token
 from typing import Optional
+from uuid import UUID
 
 async def is_logged_in(request: Request):
     """Middleware-like dependency to check authentication via JWT token."""
@@ -34,3 +35,25 @@ async def is_admin_or_instructor(request: Request):
     return decoded_token  # ✅ Return the decoded user data if admin or instructor
 #is logged in 
 
+async def get_optional_user_id(request: Request) -> Optional[UUID]:
+    """
+    Tries to get a user ID from the Authorization header.
+    Returns the user ID if the token is valid, otherwise returns None.
+    This function will NEVER raise an HTTPException.
+    """
+    token = request.headers.get("Authorization")
+
+    if not token or not token.startswith("Bearer "):
+        return None
+
+    token = token.split(" ")[1]
+
+    try:
+        # We reuse your existing, trusted verification logic
+        user_data = verify_access_token(token)
+        # Based on your schema, the user ID is in the 'id' field
+        return user_data.get("id") if user_data else None
+    except HTTPException:
+        # If verify_access_token raises an error (expired, invalid),
+        # we catch it and treat the user as anonymous.
+        return None
