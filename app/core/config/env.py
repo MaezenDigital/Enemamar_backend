@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     BUNNY_CDN_THUMB_STORAGE_APIKEY: str
     BUNNY_CDN_PROFILE_STORAGE_ZONE: str
     BUNNY_CDN_PROFILE_STORAGE_APIKEY: str
+    REDIS_URL: str
+    RATE_LIMIT_MINUTE: str
+    RATE_LIMIT_HOUR: str
+    RATE_LIMIT_SECOND: str
 
     
 

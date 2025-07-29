@@ -1,4 +1,5 @@
 import json
+from math import ceil
 from app.utils.exceptions.exceptions import ValidationError, NotFoundError
 from app.domain.schema.courseSchema import (
     PaymentData,
@@ -72,7 +73,7 @@ class PaymentService:
             amount = course_dto.price
             
             if course_dto.discount:
-                amount = course_dto.price - ((course_dto.discount/100) * course_dto.price)
+                amount = ceil(course_dto.price - ((course_dto.discount/100) * course_dto.price))
 
             data = PaymentData(
                 tx_ref=tx_ref,

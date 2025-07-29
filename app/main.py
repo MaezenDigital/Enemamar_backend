@@ -1,15 +1,24 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.middleware.cors import CORSMiddleware
+
+from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.middleware import SlowAPIMiddleware
+
 import sentry_sdk
 from sqlalchemy import text
+from app.utils.security.limiter import LIMITER
 from app.router.routers import routers
 from app.core.config.database import Base, engine
 from app.core.config.env import get_settings
 
+
+setting = get_settings()
 sentry_sdk.init(
-    dsn=get_settings().SENTRY_DNS,
+    dsn=setting.SENTRY_DNS,
     # Set traces_sample_rate to 1.0 to capture 100%
     # of transactions for tracing.
     traces_sample_rate=1.0,
@@ -21,7 +30,10 @@ sentry_sdk.init(
     profile_lifecycle="trace"
 )
 
+LIMITER = LIMITER
+
 print("initializing app")
+
 class AppCreator():
     def __init__(self):
         self.app = FastAPI(
@@ -33,6 +45,9 @@ class AppCreator():
             openapi_url="/openapi.json",
             swagger_ui_parameters={"persistAuthorization": True}
         )
+
+        self.app.state.limiter = LIMITER
+        self.app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
         allowed_origins = [
             "https://enmamar.com",
@@ -49,6 +64,7 @@ class AppCreator():
             allow_methods=["*"],  # You can restrict this further
             allow_headers=["*"],  # You can restrict this too
         )
+        self.app.add_middleware(SlowAPIMiddleware)
 
         self.app.include_router(routers)
 
@@ -74,6 +90,11 @@ app = app_creator.app
 @app.get("/sentry-debug")
 async def trigger_error():
     division_by_zero = 1 / 0
+
+@app.get("/home")
+@LIMITER.limit("5/minute")  # 5 requests per minute
+async def homepage(request: Request):
+    return JSONResponse({"message": "Welcome to the homepage!"})
 
 # Custom OpenAPI schema generator
 def custom_openapi():
