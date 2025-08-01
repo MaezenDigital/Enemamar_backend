@@ -2,6 +2,7 @@ import json
 from math import ceil
 from app.utils.exceptions.exceptions import ValidationError, NotFoundError
 from app.domain.schema.courseSchema import (
+    ChapaWebhookPayload,
     PaymentData,
     PaymentResponse,
     CallbackPayload,
@@ -12,7 +13,7 @@ from app.repository.payment_repo import PaymentRepository
 from app.repository.courseRepo import CourseRepository
 from app.repository.userRepo import UserRepository
 from sqlalchemy.orm import Session
-from fastapi import Depends
+from fastapi import Depends, Request
 from app.core.config.database import get_db
 from typing import Optional
 from app.utils.chapa.chapa import pay_course, verify_payment, generete_tx_ref
@@ -123,12 +124,12 @@ class PaymentService:
 
             return {"detail": "Course enrolled successfully", "data": enrollment_response}
 
-    def process_payment_callback(self, payload: CallbackPayload):
+    def process_payment_callback(self, payload: ChapaWebhookPayload):
         """
         Process a payment callback.
 
         Args:
-            payload (CallbackPayload): The callback payload.
+            payload (ChapaWebhookPayload): The callback payload.
 
         Returns:
             dict: The enrollment response.
@@ -136,33 +137,41 @@ class PaymentService:
         Raises:
             ValidationError: If the payment fails.
         """
+        if payload.status != "success":
+            self.payment_repo.update_payment(payload.trx_ref, payload.status, ref_id=payload.id)
+            raise ValidationError(detail="Payment failed",)
+        
+        payment, err = self.payment_repo.update_payment(payload.trx_ref, payload.status, ref_id=payload.id)
+        if err:
+            raise ValidationError(detail="Error updating payment status", data=str(err))
+
         # Validate payment exists
         payment, err = self.payment_repo.get_payment(payload.trx_ref)
-        if err:
-            raise ValidationError(detail="Error fetching payment", data=str(err))
-        if not payment:
-            raise NotFoundError(detail="Payment not found")
+        # if err:
+        #     raise ValidationError(detail="Error fetching payment", data=str(err))
+        # if not payment:
+        #     raise NotFoundError(detail="Payment not found")
 
         # Verify payment with payment provider
-        try:
-            response = verify_payment(payload.trx_ref)
-        except Exception as e:
-            raise ValidationError(detail="Payment verification failed")
+        # try:
+        #     response = verify_payment(payload.trx_ref)
+        # except Exception as e:
+        #     raise ValidationError(detail="Payment verification failed")
 
-        print(response["data"]["reference"])
+        # print(response["data"]["reference"])
 
-        if response["status"] != "success":
-            _, err = self.payment_repo.update_payment(payload.trx_ref, "failed", ref_id=response["data"]["reference"])
-            if err:
-                raise ValidationError(detail="Error updating payment status to failed", data=str(err))
-            raise ValidationError(detail="Payment failed")
+        # if response["status"] != "success":
+        #     _, err = self.payment_repo.update_payment(payload.trx_ref, "failed", ref_id=response["data"]["reference"])
+        #     if err:
+        #         raise ValidationError(detail="Error updating payment status to failed", data=str(err))
+        #     raise ValidationError(detail="Payment failed")
 
         # Update payment status
 
-        payment, err = self.payment_repo.update_payment(payload.trx_ref, "success", ref_id=response["data"]["reference"])
-        if err:
-            raise ValidationError(detail="Error updating payment status to success", data=str(err))
-        payment = PaymentResponse.model_validate(payment)
+        # payment, err = self.payment_repo.update_payment(payload.trx_ref, "success", ref_id=response["data"]["reference"])
+        # if err:
+        #     raise ValidationError(detail="Error updating payment status to success", data=str(err))
+        # payment = PaymentResponse.model_validate(payment)
 
         # Validate user exists
         user, err = self.user_repo.get_user_by_id(payment.user_id)

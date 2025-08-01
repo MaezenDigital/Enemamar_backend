@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     CHAPA_PUBLIC_KEY: str
     CHAPA_SECRET_KEY: str   
     CHAPA_ENCRIPTION_KEY: str
+    CHAPA_WEBHOOK_SECRET: str
 
     BUNNY_CDN_THUMB_PULL_ZONE: str
     BUNNY_CDN_PROFILE_PULL_ZONE: str

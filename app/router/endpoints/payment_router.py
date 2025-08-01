@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from re import S
+from fastapi import APIRouter, Depends, HTTPException, Request
 from app.domain.schema.courseSchema import (
     SearchParams,
     CallbackPayload,
@@ -7,7 +8,14 @@ from app.domain.schema.courseSchema import (
 from app.service.payment_service import PaymentService, get_payment_service
 from app.utils.middleware.dependancies import is_admin, is_logged_in
 from uuid import UUID
+import hmac
+import hashlib
+import json
+from app.core.config.env import get_settings
+from app.domain.schema.courseSchema import ChapaWebhookPayload
 
+
+SETTINGS = get_settings()
 # Public payment router
 payment_router = APIRouter(
     prefix="/payment",
@@ -46,9 +54,7 @@ async def initiate_payment(
 
 @payment_router.get("/callback")
 async def payment_callback(
-    # callback: str,
-    trx_ref: str,
-    status: str,
+    request: Request,    
     payment_service: PaymentService = Depends(get_payment_service)
 ):
     """
@@ -63,9 +69,37 @@ async def payment_callback(
     Returns:
         dict: The enrollment response.
     """
-    # print(f"Callback: {callback}")
-    payload = CallbackPayload(trx_ref=trx_ref, status=status) 
-    return payment_service.process_payment_callback(payload)
+    try:
+        # 1. Get the raw request body
+        body = await request.body()
+        
+        # 2. Get the Chapa signature from the header
+        signature = request.headers.get("Chapa-Signature") or request.headers.get("x-chapa-signature")
+        if not signature:
+            raise HTTPException(status_code=400, detail="Chapa-Signature header missing")
+
+        # 3. Verify the signature
+        CHAPA_SECRET_KEY = SETTINGS.CHAPA_WEBHOOK_SECRET
+        hasher = hmac.new(
+            CHAPA_SECRET_KEY.encode('utf-8'),
+            body,
+            hashlib.sha256
+        )
+        if hasher.hexdigest() != signature:
+            raise HTTPException(status_code=403, detail="Invalid Chapa-Signature")
+
+        # 4. Parse the JSON payload
+        payload_data = json.loads(body)
+        payload = ChapaWebhookPayload(**payload_data)
+
+        # 5. Process the payment
+        response = payment_service.process_payment_callback(payload)
+        return response
+    
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error processing payment callback: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @protected_payment_router.get("/user/{user_id}")
 async def get_user_payments(

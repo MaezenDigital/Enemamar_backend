@@ -209,6 +209,16 @@ class CallbackPayload(BaseModel):
     ref_id: Optional[str] = None
     status: str
 
+class ChapaWebhookPayload(BaseModel):
+    id: Optional[str] = None
+    trx_ref: str
+    status: str
+    amount: float
+    currency: str
+    tx_ref: str
+    type: str
+
+
 class PaginationParams(BaseModel):
     page: Optional[int] = Field(default=None, ge=1, description="Page number (1-based)")
     page_size: Optional[int] = Field(default=None, ge=1, le=100, description="Number of items per page")
