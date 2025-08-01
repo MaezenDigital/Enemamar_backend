@@ -80,6 +80,7 @@ async def payment_callback(
 
         # 3. Verify the signature
         CHAPA_SECRET_KEY = SETTINGS.CHAPA_WEBHOOK_SECRET
+        print(f"CHAPA_SECRET_KEY: {CHAPA_SECRET_KEY}")
         hasher = hmac.new(
             CHAPA_SECRET_KEY.encode('utf-8'),
             body,
