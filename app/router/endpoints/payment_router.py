@@ -52,7 +52,7 @@ async def initiate_payment(
     
     return payment_service.initiate_payment(user_id, course_id)
 
-@payment_router.get("/callback")
+@payment_router.post("/callback")
 async def payment_callback(
     request: Request,    
     payment_service: PaymentService = Depends(get_payment_service)
