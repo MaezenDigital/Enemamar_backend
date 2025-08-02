@@ -102,10 +102,10 @@ async def payment_callback(
             detail="Invalid JSON in request body."
         )
     trx_ref = payload.get("trx_ref")
-    status = payload.get("status")
+    payment_status = payload.get("status")
     reference = payload.get("reference")
 
-    payload = CallbackPayload(trx_ref=trx_ref, status=status, reference=reference) 
+    payload = CallbackPayload(trx_ref=trx_ref, status=payment_status, reference=reference)
     return payment_service.process_payment_callback(payload)
 
 @protected_payment_router.get("/user/{user_id}")
