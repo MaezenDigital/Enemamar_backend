@@ -137,11 +137,11 @@ class PaymentService:
             ValidationError: If the payment fails.
         """
         # Validate payment exists
-        payment, err = self.payment_repo.get_payment(payload.trx_ref)
-        if err:
-            raise ValidationError(detail="Error fetching payment", data=str(err))
-        if not payment:
-            raise NotFoundError(detail="Payment not found")
+        # payment, err = self.payment_repo.get_payment(payload.trx_ref)
+        # if err:
+        #     raise ValidationError(detail="Error fetching payment", data=str(err))
+        # if not payment:
+        #     raise NotFoundError(detail="Payment not found")
 
         # Verify payment with payment provider
         try:
@@ -152,14 +152,14 @@ class PaymentService:
         print(response["data"]["reference"])
 
         if response["status"] != "success":
-            _, err = self.payment_repo.update_payment(payload.trx_ref, "failed", ref_id=response["data"]["reference"])
+            _, err = self.payment_repo.update_payment(payload.trx_ref, status=payload.status, ref_id=payload.reference)
             if err:
                 raise ValidationError(detail="Error updating payment status to failed", data=str(err))
             raise ValidationError(detail="Payment failed")
 
         # Update payment status
 
-        payment, err = self.payment_repo.update_payment(payload.trx_ref, "success", ref_id=response["data"]["reference"])
+        payment, err = self.payment_repo.update_payment(payload.trx_ref, status=payload.status, ref_id=payload.reference)
         if err:
             raise ValidationError(detail="Error updating payment status to success", data=str(err))
         payment = PaymentResponse.model_validate(payment)

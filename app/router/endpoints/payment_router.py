@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request,HTTPException, status
 from app.domain.schema.courseSchema import (
     SearchParams,
     CallbackPayload,
@@ -7,6 +7,14 @@ from app.domain.schema.courseSchema import (
 from app.service.payment_service import PaymentService, get_payment_service
 from app.utils.middleware.dependancies import is_admin, is_logged_in
 from uuid import UUID
+import hmac
+import hashlib
+import json
+from app.core.config.env import get_settings
+
+# Load settings
+settings = get_settings()
+CHAPA_WEBHOOK_SECRET = settings.CHAPA_WEBHOOK_SECRET
 
 # Public payment router
 payment_router = APIRouter(
@@ -47,8 +55,9 @@ async def initiate_payment(
 @payment_router.get("/callback")
 async def payment_callback(
     # callback: str,
-    trx_ref: str,
-    status: str,
+    # trx_ref: str,
+    # status: str,
+    request: Request,
     payment_service: PaymentService = Depends(get_payment_service)
 ):
     """
@@ -64,7 +73,35 @@ async def payment_callback(
         dict: The enrollment response.
     """
     # print(f"Callback: {callback}")
-    payload = CallbackPayload(trx_ref=trx_ref, status=status) 
+
+    raw_body=await request.body(),
+    chapa_signature=await request.headers.get("Chapa-Signature")
+
+
+    local_signature = local_signature = hmac.new(
+        CHAPA_WEBHOOK_SECRET.encode('utf-8'),
+        raw_body,
+        hashlib.sha256
+    ).hexdigest()
+
+    if not hmac.compare_digest(local_signature, chapa_signature):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid signature."
+        )
+
+    try:
+        payload = json.loads(raw_body)
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid JSON in request body."
+        )
+    trx_ref = payload.get("trx_ref")
+    status = payload.get("status")
+    reference = payload.get("reference")
+
+    payload = CallbackPayload(trx_ref=trx_ref, status=status, reference=reference) 
     return payment_service.process_payment_callback(payload)
 
 @protected_payment_router.get("/user/{user_id}")
