@@ -139,11 +139,14 @@ class PaymentService:
         # Validate payment exists
         payment, err = self.payment_repo.get_payment(payload.trx_ref)
         if err:
+            print("Error fetching payment:", err)
             raise ValidationError(detail="Error fetching payment", data=str(err))
         if not payment:
+            print("Payment not found for trx_ref:", payload.trx_ref)
             raise NotFoundError(detail="Payment not found")
         
         if payment.status != "pending":
+            print("Payment already processed for trx_ref:", payload.trx_ref)
             raise ValidationError(detail="Payment already processed", data="This payment has already been processed")
 
         # Verify payment with payment provider
@@ -153,11 +156,13 @@ class PaymentService:
         try:
             response = verify_payment(payload.trx_ref)
         except Exception as e:
+            print("Error verifying payment:", e)
             raise ValidationError(detail="Payment verification failed")
 
-        print(response["data"]["reference"])
-
-        if response["status"] != "success":
+        print("Payment verification response:", response)
+        payment_status = response["status"]
+        if payment_status != "success":
+            print("Payment verification failed with status:", payment_status)
             _, err = self.payment_repo.update_payment(payload.trx_ref, status=payload.status, ref_id=payload.reference)
             if err:
                 raise ValidationError(detail="Error updating payment status to failed", data=str(err))
