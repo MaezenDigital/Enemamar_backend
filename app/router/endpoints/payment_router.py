@@ -53,7 +53,7 @@ async def initiate_payment(
     return payment_service.initiate_payment(user_id, course_id)
 
 
-@payment_router.get("/callback")
+@payment_router.post("/callback")
 async def payment_callback(
     # callback: str,
     ref_id: str,
@@ -80,12 +80,12 @@ async def payment_callback(
 
 
 @payment_router.post("/webhook")
-async def payment_callback(
+async def payment_webhook(
     request: Request,
     payment_service: PaymentService = Depends(get_payment_service)
 ):
     """
-    Process and verify a Chapa payment callback.
+    Process and verify a Chapa payment webhook.
     """
     # 1. Get the signature from the headers. Prioritize 'x-chapa-signature'.
     chapa_signature = request.headers.get("x-chapa-signature")
@@ -108,6 +108,7 @@ async def payment_callback(
             detail="Invalid JSON in request body."
         )
 
+    print(f"Received payload: {payload_dict}")
     # 3. --- THIS IS THE CRITICAL FIX ---
     # Re-serialize the parsed dictionary to a compact JSON string.
     # The `separators` argument removes whitespace, creating a deterministic string.
@@ -133,6 +134,12 @@ async def payment_callback(
     trx_ref = payload_dict.get("trx_ref")
     payment_status = payload_dict.get("status") # Renamed to avoid conflict with `status` module
     reference = payload_dict.get("reference")
+
+    if not trx_ref or not payment_status:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing required fields ('trx_ref', 'status') in webhook payload."
+        )
 
     payload = CallbackPayload(trx_ref=trx_ref, status=payment_status, reference=reference) 
     
