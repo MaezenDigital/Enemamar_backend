@@ -52,12 +52,13 @@ async def initiate_payment(
     
     return payment_service.initiate_payment(user_id, course_id)
 
-@payment_router.post("/callback")
+
+@payment_router.get("/callback")
 async def payment_callback(
     # callback: str,
-    # trx_ref: str,
-    # status: str,
-    request: Request,
+    ref_id: str,
+    trx_ref: str,
+    status: str,
     payment_service: PaymentService = Depends(get_payment_service)
 ):
     """
@@ -73,39 +74,68 @@ async def payment_callback(
         dict: The enrollment response.
     """
     # print(f"Callback: {callback}")
+    payload = CallbackPayload(trx_ref=trx_ref, status=status, reference=ref_id) 
+    return payment_service.process_payment_callback(payload)
 
-    raw_body=await request.body()
-    chapa_signature= request.headers.get("Chapa-Signature")
+
+
+@payment_router.post("/webhook")
+async def payment_callback(
+    request: Request,
+    payment_service: PaymentService = Depends(get_payment_service)
+):
+    """
+    Process and verify a Chapa payment callback.
+    """
+    # 1. Get the signature from the headers. Prioritize 'x-chapa-signature'.
+    chapa_signature = request.headers.get("x-chapa-signature")
+    if not chapa_signature:
+        chapa_signature = request.headers.get("Chapa-Signature")
+
     if not chapa_signature:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Chapa-Signature header is missing."
+            detail="Webhook signature header not found."
         )
 
+    # 2. Get the raw body and parse it into a dictionary
+    raw_body = await request.body()
+    try:
+        payload_dict = json.loads(raw_body)
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid JSON in request body."
+        )
+
+    # 3. --- THIS IS THE CRITICAL FIX ---
+    # Re-serialize the parsed dictionary to a compact JSON string.
+    # The `separators` argument removes whitespace, creating a deterministic string.
+    # Then, encode it to bytes for HMAC.
+    payload_to_hash = json.dumps(payload_dict, separators=(",", ":")).encode('utf-8')
+
+    # 4. Generate the local signature using the re-serialized payload
     local_signature = hmac.new(
         CHAPA_WEBHOOK_SECRET.encode('utf-8'),
-        raw_body,
+        payload_to_hash, # Use the new, correct payload
         hashlib.sha256
     ).hexdigest()
 
+    # 5. Securely compare the signatures
     if not hmac.compare_digest(local_signature, chapa_signature):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid signature."
         )
 
-    try:
-        payload = json.loads(raw_body)
-    except json.JSONDecodeError:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid JSON in request body."
-        )
-    trx_ref = payload.get("trx_ref")
-    payment_status = payload.get("status")
-    reference = payload.get("reference")
+    # --- Signature is valid, proceed with your business logic ---
+    
+    trx_ref = payload_dict.get("trx_ref")
+    payment_status = payload_dict.get("status") # Renamed to avoid conflict with `status` module
+    reference = payload_dict.get("reference")
 
-    payload = CallbackPayload(trx_ref=trx_ref, status=payment_status, reference=reference)
+    payload = CallbackPayload(trx_ref=trx_ref, status=payment_status, reference=reference) 
+    
     return payment_service.process_payment_callback(payload)
 
 @protected_payment_router.get("/user/{user_id}")
