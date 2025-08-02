@@ -53,7 +53,7 @@ async def initiate_payment(
     return payment_service.initiate_payment(user_id, course_id)
 
 
-@payment_router.post("/callback")
+@payment_router.get("/callback")
 async def payment_callback(
     # callback: str,
     ref_id: str,
@@ -131,7 +131,7 @@ async def payment_webhook(
 
     # --- Signature is valid, proceed with your business logic ---
     
-    trx_ref = payload_dict.get("trx_ref")
+    trx_ref = payload_dict.get("tx_ref")
     payment_status = payload_dict.get("status") # Renamed to avoid conflict with `status` module
     reference = payload_dict.get("reference")
 
