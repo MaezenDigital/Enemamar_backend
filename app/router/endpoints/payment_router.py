@@ -74,11 +74,15 @@ async def payment_callback(
     """
     # print(f"Callback: {callback}")
 
-    raw_body=await request.body(),
-    chapa_signature=await request.headers.get("Chapa-Signature")
+    raw_body=await request.body()
+    chapa_signature= request.headers.get("Chapa-Signature")
+    if not chapa_signature:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Chapa-Signature header is missing."
+        )
 
-
-    local_signature = local_signature = hmac.new(
+    local_signature = hmac.new(
         CHAPA_WEBHOOK_SECRET.encode('utf-8'),
         raw_body,
         hashlib.sha256
