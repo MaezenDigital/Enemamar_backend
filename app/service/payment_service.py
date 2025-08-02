@@ -137,13 +137,19 @@ class PaymentService:
             ValidationError: If the payment fails.
         """
         # Validate payment exists
-        # payment, err = self.payment_repo.get_payment(payload.trx_ref)
-        # if err:
-        #     raise ValidationError(detail="Error fetching payment", data=str(err))
-        # if not payment:
-        #     raise NotFoundError(detail="Payment not found")
+        payment, err = self.payment_repo.get_payment(payload.trx_ref)
+        if err:
+            raise ValidationError(detail="Error fetching payment", data=str(err))
+        if not payment:
+            raise NotFoundError(detail="Payment not found")
+        
+        if payment.status != "pending":
+            raise ValidationError(detail="Payment already processed", data="This payment has already been processed")
 
         # Verify payment with payment provider
+
+
+        
         try:
             response = verify_payment(payload.trx_ref)
         except Exception as e:
