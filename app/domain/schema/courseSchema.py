@@ -203,6 +203,7 @@ class PaymentData(BaseModel):
     last_name: Optional[str] = None
     title: Optional[str] = None
     callback_url: Optional[str] = None
+    return_url: Optional[str] = None
 
 class CallbackPayload(BaseModel):
     trx_ref: str
