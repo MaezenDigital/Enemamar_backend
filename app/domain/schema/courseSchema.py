@@ -212,7 +212,7 @@ class CallbackPayload(BaseModel):
 
 class PaginationParams(BaseModel):
     page: Optional[int] = Field(default=None, ge=1, description="Page number (1-based)")
-    page_size: Optional[int] = Field(default=None, ge=1, le=100, description="Number of items per page")
+    page_size: Optional[int] = Field(default=None, ge=1, description="Number of items per page")
 
 class SearchParams(PaginationParams):
     search: Optional[str] = Field(
@@ -222,6 +222,10 @@ class SearchParams(PaginationParams):
     filter: Optional[str] = Field(
         default=None,
         description="Filter term"
+    )
+    is_active : Optional[bool] = Field(
+        default=None,
+        description="Filter by active status"
     )
 
 class DateFilterParams(SearchParams):
