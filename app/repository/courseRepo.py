@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
+from app.domain.model import course
 from app.domain.model.course import Course, Enrollment, Lesson, Video, Comment, Review, Payment
 from app.domain.schema.courseSchema import CourseAnalysisResponse
 from app.utils.exceptions.exceptions import NotFoundError, ValidationError
@@ -446,6 +447,49 @@ class CourseRepository:
             day=day
         )
 
+    def get_monthly_enrollment_count(
+        self,
+        year: int,
+        month: int,
+    ):
+        """
+        Get the total number of enrollments for a specific month of a year.
+        """
+        try:
+            total_enrollments = (
+                self.db.query(func.count(Enrollment.id))
+                .filter(func.extract('year', Enrollment.enrolled_at) == year)
+                .filter(func.extract('month', Enrollment.enrolled_at) == month)
+                .scalar()
+            ) or 0
+            return _wrap_return(total_enrollments)
+        except Exception as e:
+            return _wrap_error(e)
+
+    def get_monthly_course_count(
+        self,
+        year: int,
+        month: int,
+    ):
+
+        try:
+            total_course = (
+                self.db.query(func.count(Course.id))
+                .filter(func.extract('year', Course.updated_at) == year)
+                .filter(func.extract('month', Course.updated_at) == month)
+                .scalar()
+            ) or 0
+            return _wrap_return(total_course)
+        except Exception as e:
+            return _wrap_error(e)
+        
+    def get_monthly_revenue(
+        self,
+        year: int,
+        month: int,
+    ):
+        return self.payment_repo.get_monthly_revenue(year, month)
+ 
     def get_enrolled_users_count_with_date_filter(
         self,
         course_id: str,

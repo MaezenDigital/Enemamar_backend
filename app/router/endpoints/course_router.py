@@ -187,6 +187,31 @@ analysis_router = APIRouter(
     prefix="/analysis",
     tags=["course"]
 )
+@analysis_router.get(
+    "/yearly",
+    # response_model=YearAnalysisResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get yearly course analysis",
+    description="Retrieve yearly analysis of courses including revenue, enrollments, and course counts.",
+    dependencies=[Depends(is_admin)]
+)
+async def get_yearly_analysis(
+    year: int,
+    course_service: CourseService = Depends(get_course_service)
+):
+    """
+    Retrieve yearly analysis of courses including:
+    - Total revenue generated
+    - Total enrollments across all courses
+    - Total number of courses created
+
+    **Date Filtering**:
+    - **year**: Filter by year (e.g., 2024)
+
+    Only accessible to users with admin role.
+    """
+    
+    return course_service.get_yearly_analysis(year) 
 
 @analysis_router.get(
     "/instructor/courses",

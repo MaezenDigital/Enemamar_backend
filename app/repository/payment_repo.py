@@ -314,3 +314,21 @@ class PaymentRepository:
             return _wrap_return(total_revenue)
         except Exception as e:
             return _wrap_error(e)
+    
+    def get_monthly_revenue(
+        self,
+        year: int,
+        month: int
+    ):
+        """Get the total revenue for a specific month of a year."""
+        try:
+            total_revenue = (
+                self.db.query(func.sum(Payment.amount))
+                .filter(func.extract('year', Payment.updated_at) == year)
+                .filter(func.extract('month', Payment.updated_at) == month)
+                .filter(Payment.status == "success")
+                .scalar()
+            ) or 0.0
+            return _wrap_return(total_revenue)
+        except Exception as e:
+            return _wrap_error(e)
