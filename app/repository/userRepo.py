@@ -52,9 +52,12 @@ class UserRepository:
             self.db.rollback()
             return _wrap_error(e)
 
-    def get_all_users(self, search: Optional[str] = None, page: int = 1, page_size: int = 10, filter: Optional[str] = None):
+    def get_all_users(self, search: Optional[str] = None, page: int = 1, page_size: int = 10, filter: Optional[str] = None, is_active: Optional[bool] = None):
         try:
-            query = self.db.query(User).filter(User.is_active == True)
+            query = self.db.query(User)
+
+            if is_active is not None:
+                query = query.filter(User.is_active == is_active)
 
             if search:
                 search_term = f"%{search}%"
@@ -255,7 +258,7 @@ class UserRepository:
             self.db.rollback()
             return _wrap_error(e)
 
-    def get_users_count(self, search: Optional[str] = None, filter: Optional[str] = None):
+    def get_users_count(self, search: Optional[str] = None, filter: Optional[str] = None, is_active: Optional[bool] = None):
         """
         Get the total count of users with search and filter options.
 
@@ -267,8 +270,11 @@ class UserRepository:
             int: The total number of users matching the criteria.
         """
         try:
-            query = self.db.query(User).filter(User.is_active == True)
+            query = self.db.query(User)
 
+            if is_active is not None:
+                query = query.filter(User.is_active == is_active)
+        
             if search:
                 search_term = f"%{search}%"
                 query = query.filter(

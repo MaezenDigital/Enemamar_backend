@@ -19,17 +19,17 @@ class UserService:
         self.user_repo = UserRepository(db)
 
     #get all users
-    def get_all_users(self, search: Optional[str] = None, page: int = 1, page_size: int = 10, filter: Optional[str] = None):
+    def get_all_users(self, search: Optional[str] = None, page: int = 1, page_size: int = 10, filter: Optional[str] = None, is_active: Optional[bool] = None):
         # Ensure pagination defaults when parameters are None
         page = page or 1
         page_size = page_size or 10
 
-        users, err = self.user_repo.get_all_users(search=search, page=page, page_size=page_size, filter=filter)
+        users, err = self.user_repo.get_all_users(search=search, page=page, page_size=page_size, filter=filter, is_active=is_active)
         if err:
             raise ValidationError(detail="Failed to retrieve users", data=str(err))
 
         # Get total count for pagination metadata
-        total_count, err = self.user_repo.get_users_count(search=search, filter=filter)
+        total_count, err = self.user_repo.get_users_count(search=search, filter=filter, is_active=is_active)
         if err:
             raise ValidationError(detail="Failed to retrieve users count", data=str(err))
 

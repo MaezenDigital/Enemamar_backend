@@ -47,7 +47,8 @@ async def get_all_users(
         search=params.search,
         page=params.page,
         page_size=params.page_size,
-        filter=params.filter
+        filter=params.filter,
+        is_active=params.is_active
     )
 
 

@@ -12,6 +12,7 @@ from app.utils.security.hash import hash_password, verify_password
 from app.utils.security.jwt_handler import verify_refresh_token, verify_access_token, create_access_token, create_refresh_token, create_password_reset_token, verify_password_reset_token
 from app.utils.otp.sms import send_otp_sms, verify_otp_sms
 from app.utils.helper import normalize_phone_number, format_phone_for_sending
+from fastapi import Response, status
 
 
 class AuthService:
@@ -68,7 +69,11 @@ class AuthService:
         
         user_response = UserResponse.model_validate(user)
         if not user.is_active:
-            return {"detail": "User is not active", "is_active": False}
+            return Response(
+            content=json.dumps({"detail": "User is not active", "is_active": False}),
+            status_code=status.HTTP_403_FORBIDDEN,
+            media_type="application/json"
+            )
 
         if not verify_password(login_data.password, user.password):
             raise ValidationError(detail="Incorrect password")
