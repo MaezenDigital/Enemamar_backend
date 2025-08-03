@@ -1,3 +1,5 @@
+from pyclbr import Class
+from urllib import response
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from uuid import UUID
@@ -267,3 +269,12 @@ class InstructorEnrollmentsResponse(BaseModel):
         "from_attributes": True
     }
 
+
+class MonthlyAnalysisResponse(BaseModel):
+    month: int
+    total_revenue: float
+    total_enrollments: int
+    total_courses: int
+
+class YearAnalysisResponse(BaseModel):
+    response: List[MonthlyAnalysisResponse]

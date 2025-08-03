@@ -1,3 +1,4 @@
+from urllib import response
 from app.utils.exceptions.exceptions import ValidationError, NotFoundError
 import re
 from app.domain.schema.courseSchema import (
@@ -7,6 +8,8 @@ from app.domain.schema.courseSchema import (
     UserResponse,
     CourseAnalysisResponse,
     InstructorEnrollmentItem,
+    YearAnalysisResponse,
+    MonthlyAnalysisResponse,
 )
 from app.domain.model.course import Course, Enrollment
 from app.repository.courseRepo import CourseRepository
@@ -776,6 +779,49 @@ class CourseService:
             items.append(InstructorEnrollmentItem(user=user_schema, course=course_schema, enrolled_at=enrollment.enrolled_at))
         return {"detail": "Instructor enrollments fetched successfully", "data": items}
 
+    def get_yearly_analysis(
+        self,
+        year: int,
+    ):
+        """
+        Get yearly analysis data for courses, including total revenue, enrollments, and courses created in the specified month.
+        
+        Args:
+            year (int): The year to filter by.
+
+        Returns:
+            YearAnalysisResponse: Response containing the analysis data.
+        """
+        if not year:
+            raise ValidationError(detail="Year is required")
+        
+        response = []
+        
+        for i in range(1, 13):
+            course_count, err = self.course_repo.get_monthly_course_count(year, i)
+            if err:
+                raise ValidationError(detail="Failed to fetch yearly analysis", data=str(err))
+
+            enrollment_count, err = self.course_repo.get_monthly_enrollment_count(year, i)
+            if err:
+                raise ValidationError(detail="Failed to fetch yearly analysis", data=str(err))
+
+            revenue, err = self.course_repo.get_monthly_revenue(year, i)
+            if err:
+                raise ValidationError(detail="Failed to fetch yearly analysis", data=str(err))
+            
+            response.append(MonthlyAnalysisResponse(
+                month=i,
+                total_revenue=revenue,
+                total_enrollments=enrollment_count,
+                total_courses=course_count
+            ))
+        
+        return YearAnalysisResponse(response=response)
+            
+
+        
+        
 
 def get_course_service(db: Session = Depends(get_db)):
     return CourseService(db)
