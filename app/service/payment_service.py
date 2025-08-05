@@ -20,6 +20,7 @@ from app.utils.chapa.chapa import pay_course, verify_payment, generete_tx_ref
 from app.domain.schema.courseSchema import EnrollmentResponse
 from app.core.config.env import get_settings
 from app.utils.otp.sms import send_sms
+import time
 settings = get_settings()
 class PaymentService:
     def __init__(self, db: Session):
@@ -210,15 +211,22 @@ class PaymentService:
             print("Error enrolling course after payment")
             raise ValidationError(detail="Error enrolling course")
 
-        try:
-            message = f"You have successfully enrolled in {course.title}. Thank you for choosing our platform!"
-            phone_number = f"0{user.phone_number}"
-            print("Sending SMS to:", phone_number)
-            print("Message:", message)
-            status_code, content = send_sms(phone_number, message)
+        max_attempts = 5
+        attempt = 0
+        status_code = None
 
-            print("SMS Status Code:", status_code)
-            if status_code != 200:
+        while attempt < max_attempts:
+            try:
+                message = f"You have successfully enrolled in {course.title}. Thank you for choosing our platform!"
+                phone_number = f"0{user.phone_number}"
+                print("Sending SMS to:", phone_number)
+                print("Message:", message)
+                status_code, content = send_sms(phone_number, message)
+
+                print("SMS Status Code:", status_code)
+                if status_code == 200:
+                    break  # Success, exit loop
+
                 content_decoded = content
                 if isinstance(content, (bytes, bytearray)):
                     try:
@@ -227,8 +235,12 @@ class PaymentService:
                         content_decoded = content.decode("utf-8", errors="ignore")
                 print("Error sending SMS:", content_decoded)
 
-        except Exception as e:
-            print("Error sending SMS:", e)
+            except Exception as e:
+                print("Error sending SMS:", e)
+
+            attempt += 1
+            if attempt < max_attempts:
+                time.sleep(3)
 
 
         # Convert SQLAlchemy Enrollment object to Pydantic Response Model
