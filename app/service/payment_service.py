@@ -152,7 +152,7 @@ class PaymentService:
         
         if payment.status != "pending":
             print("Payment already processed for trx_ref:", payload.trx_ref)
-            raise ValidationError(detail="Payment already processed", data="This payment has already been processed")
+            return {"detail": "Payment already processed", "data": "This payment has already been processed"}
 
         # Verify payment with payment provider
 
@@ -246,7 +246,7 @@ class PaymentService:
         # Convert SQLAlchemy Enrollment object to Pydantic Response Model
         enrollment_response = EnrollmentResponse.model_validate(enrollment)
 
-        return {"detail": "Course enrolled successfully", "data": enrollment_response}
+        return {"detail": "Course enrolled successfully"}
 
     def get_user_payments(
         self,
