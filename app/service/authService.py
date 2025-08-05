@@ -13,6 +13,7 @@ from app.utils.security.jwt_handler import verify_refresh_token, verify_access_t
 from app.utils.otp.sms import send_otp_sms, verify_otp_sms
 from app.utils.helper import normalize_phone_number, format_phone_for_sending
 from fastapi import Response, status
+import time
 
 
 class AuthService:
@@ -118,25 +119,33 @@ class AuthService:
 
     def send_otp(self, phone_number: str):
         print("Sending OTP to phone number:", phone_number)
-        phone_number = format_phone_for_sending(phone_number)
-        try:
-            status_code, content = send_otp_sms(phone_number)
-        except Exception as e:
-            raise ValidationError(detail="Failed to send OTP", data=str(e))
-        print("Sending OTP to phone number:", phone_number)
-        
-        if status_code == 200:  # Assuming 200 means success
-            print("OTP sent successfully to:", phone_number)
-            return {"detail": "OTP sent successfully", "status_code": status_code}
-        else:
-            # decode bytes→JSON or utf-8, else leave as is
-            content_decoded = content
-            if isinstance(content, (bytes, bytearray)):
-                try:
-                    content_decoded = json.loads(content)
-                except Exception:
-                    content_decoded = content.decode("utf-8", errors="ignore")
-            raise ValidationError(detail="Failed to send OTP", data=content_decoded)
+        formatted_phone_number = format_phone_for_sending(phone_number)
+        attempts = 0
+        max_attempts = 5
+        delay = 3  # seconds
+
+        while attempts < max_attempts:
+            try:
+                status_code, content = send_otp_sms(formatted_phone_number)
+            except Exception as e:
+                raise ValidationError(detail="Failed to send OTP", data=str(e))
+            
+            if status_code == 200:
+                print("OTP sent successfully to:", formatted_phone_number)
+                return {"detail": "OTP sent successfully", "status_code": status_code}
+            else:
+                attempts += 1
+                if attempts < max_attempts:
+                    time.sleep(delay)
+                else:
+                    # decode bytes→JSON or utf-8, else leave as is
+                    content_decoded = content
+                    if isinstance(content, (bytes, bytearray)):
+                        try:
+                            content_decoded = json.loads(content)
+                        except Exception:
+                            content_decoded = content.decode("utf-8", errors="ignore")
+                    raise ValidationError(detail="Failed to send OTP after multiple attempts", data=content_decoded)
 
 
     def verify_otp(self, phone_number: str, code: str):
