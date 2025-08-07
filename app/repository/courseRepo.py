@@ -451,17 +451,21 @@ class CourseRepository:
         self,
         year: int,
         month: int,
+        course_id: Optional[str] = None
     ):
         """
         Get the total number of enrollments for a specific month of a year.
+        Optionally filter by course_id.
         """
         try:
-            total_enrollments = (
+            query = (
                 self.db.query(func.count(Enrollment.id))
                 .filter(func.extract('year', Enrollment.enrolled_at) == year)
                 .filter(func.extract('month', Enrollment.enrolled_at) == month)
-                .scalar()
-            ) or 0
+            )
+            if course_id:
+                query = query.filter(Enrollment.course_id == course_id)
+            total_enrollments = query.scalar() or 0
             return _wrap_return(total_enrollments)
         except Exception as e:
             return _wrap_error(e)
@@ -470,15 +474,17 @@ class CourseRepository:
         self,
         year: int,
         month: int,
+        instructor_id: Optional[str] = None
     ):
 
         try:
-            total_course = (
-                self.db.query(func.count(Course.id))
-                .filter(func.extract('year', Course.updated_at) == year)
-                .filter(func.extract('month', Course.updated_at) == month)
-                .scalar()
-            ) or 0
+            query = self.db.query(func.count(Course.id)).filter(
+            func.extract('year', Course.updated_at) == year,
+            func.extract('month', Course.updated_at) == month
+            )
+            if instructor_id:
+                query = query.filter(Course.instructor_id == instructor_id)
+            total_course = query.scalar() or 0
             return _wrap_return(total_course)
         except Exception as e:
             return _wrap_error(e)
@@ -487,9 +493,11 @@ class CourseRepository:
         self,
         year: int,
         month: int,
+        course_id: Optional[str] = None
+
     ):
-        return self.payment_repo.get_monthly_revenue(year, month)
- 
+        return self.payment_repo.get_monthly_revenue(year, month, course_id)
+
     def get_enrolled_users_count_with_date_filter(
         self,
         course_id: str,
@@ -877,5 +885,24 @@ class CourseRepository:
             if not course or not course.instructor_id:
                 return None, NotFoundError(detail="Course or instructor not found")
             return _wrap_return(course.instructor_id)
+        except Exception as e:
+            return _wrap_error(e)
+
+    def get_instructor_courses(
+            self,
+            instructor_id: str,
+    ):
+        """
+        Get all courses taught by a specific instructor.
+
+        Args:
+            instructor_id (str): The ID of the instructor.
+
+        Returns:
+            list[Course]: A list of courses taught by the instructor.
+        """
+        try:
+            courses = self.db.query(Course).filter(Course.instructor_id == instructor_id).all()
+            return _wrap_return(courses)
         except Exception as e:
             return _wrap_error(e)

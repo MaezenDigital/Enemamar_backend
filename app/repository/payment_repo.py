@@ -318,17 +318,20 @@ class PaymentRepository:
     def get_monthly_revenue(
         self,
         year: int,
-        month: int
+        month: int,
+        course_id: Optional[str] = None
     ):
-        """Get the total revenue for a specific month of a year."""
+        """Get the total revenue for a specific month of a year, optionally filtered by course_id."""
         try:
-            total_revenue = (
+            query = (
                 self.db.query(func.sum(Payment.amount))
                 .filter(func.extract('year', Payment.updated_at) == year)
                 .filter(func.extract('month', Payment.updated_at) == month)
                 .filter(Payment.status == "success")
-                .scalar()
-            ) or 0.0
+            )
+            if course_id is not None:
+                query = query.filter(Payment.course_id == course_id)
+            total_revenue = query.scalar() or 0.0
             return _wrap_return(total_revenue)
         except Exception as e:
             return _wrap_error(e)

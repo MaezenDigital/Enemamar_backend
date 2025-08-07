@@ -64,6 +64,12 @@ class CommentReviewService:
             raise ValidationError(detail="Failed to retrieve course", data=str(err))
 
         # Create comment
+         # Check if user is enrolled in the course
+        is_enrolled, err = self.course_repo.get_enrollment(str(user_id), course_id)
+        if err:
+            raise ValidationError(detail="Failed to check enrollment", data=str(err))
+        if not is_enrolled:
+            raise ValidationError(detail="User must be enrolled in the course to comment")
         comment = Comment(
             content=comment_input.content,
             user_id=user_id,

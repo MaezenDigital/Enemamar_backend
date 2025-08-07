@@ -122,7 +122,7 @@ class AuthService:
         formatted_phone_number = format_phone_for_sending(phone_number)
         attempts = 0
         max_attempts = 5
-        delay = 3  # seconds
+        delay = 1.5  # seconds
 
         while attempts < max_attempts:
             try:

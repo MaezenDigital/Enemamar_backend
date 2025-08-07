@@ -336,3 +336,23 @@ async def fetch_instructor_enrollments(
     instructor_id = decoded_token.get("id")
 
     return course_service.getInstructorEnrollments(instructor_id, days)
+
+@inst_admin_router.get("/analysis/yearly")
+async def get_yearly_analysis_inst(
+    year: int,
+    course_service: CourseService = Depends(get_course_service),
+    decoded_token: dict = Depends(is_admin_or_instructor)
+):
+    """
+    Get yearly analysis of courses, enrollments, and revenue.
+
+    Args:
+        year (int): The year to analyze.
+        course_service (CourseService): The course service.
+        decoded_token (dict): The decoded JWT token containing user information.
+
+    Returns:
+        dict: The yearly analysis response.
+    """
+    user_id = decoded_token.get("id")
+    return course_service.get_yearly_analysis_by_instructor(instructor_id=user_id, year=year)

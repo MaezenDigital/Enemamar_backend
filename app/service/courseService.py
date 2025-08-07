@@ -798,15 +798,15 @@ class CourseService:
         response = []
         
         for i in range(1, 13):
-            course_count, err = self.course_repo.get_monthly_course_count(year, i)
+            course_count, err = self.course_repo.get_monthly_course_count(year, i, instructor_id=None)
             if err:
                 raise ValidationError(detail="Failed to fetch yearly analysis", data=str(err))
 
-            enrollment_count, err = self.course_repo.get_monthly_enrollment_count(year, i)
+            enrollment_count, err = self.course_repo.get_monthly_enrollment_count(year, i, course_id=None)
             if err:
                 raise ValidationError(detail="Failed to fetch yearly analysis", data=str(err))
 
-            revenue, err = self.course_repo.get_monthly_revenue(year, i)
+            revenue, err = self.course_repo.get_monthly_revenue(year, i, course_id=None)
             if err:
                 raise ValidationError(detail="Failed to fetch yearly analysis", data=str(err))
             
@@ -819,7 +819,57 @@ class CourseService:
         
         return YearAnalysisResponse(response=response)
             
+    def get_yearly_analysis_by_instructor(
+        self,
+        instructor_id: str,
+        year: int,
+    ):
+        """
+        Get yearly analysis data for courses taught by a specific instructor, including total revenue, enrollments, and courses created in the specified month.
+        
+        Args:
+            instructor_id (str): The ID of the instructor.
+            year (int): The year to filter by.
 
+        Returns:
+            YearAnalysisResponse: Response containing the analysis data.
+        """
+        if not instructor_id:
+            raise ValidationError(detail="Instructor ID is required")
+        if not year:
+            raise ValidationError(detail="Year is required")
+        
+        response = []
+
+        courses, err = self.course_repo.get_instructor_courses(instructor_id)
+        if err:
+            raise ValidationError(detail="Failed to fetch instructor courses", data=str(err))
+
+        for i in range(1, 13):
+            course_count, err = self.course_repo.get_monthly_course_count(year, i, instructor_id=instructor_id)
+            if err:
+                raise ValidationError(detail="Failed to fetch yearly analysis", data=str(err))
+            total_enrollments = 0
+            total_revenue = 0
+            for course in courses:
+                enrollment_count, err = self.course_repo.get_monthly_enrollment_count(year, i, course_id=course.id)
+                if err:
+                    raise ValidationError(detail="Failed to fetch yearly analysis", data=str(err))
+                total_enrollments += enrollment_count
+
+                revenue, err = self.course_repo.get_monthly_revenue(year, i, course_id=course.id)
+                if err:
+                    raise ValidationError(detail="Failed to fetch yearly analysis", data=str(err))
+                total_revenue += revenue
+
+            response.append(MonthlyAnalysisResponse(
+                month=i,
+                total_revenue=total_revenue,
+                total_enrollments=total_enrollments,
+                total_courses=course_count
+            ))
+
+        return YearAnalysisResponse(response=response)
         
         
 

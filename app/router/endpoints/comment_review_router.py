@@ -25,39 +25,7 @@ comment_router = APIRouter(
     status_code=status.HTTP_201_CREATED,
     summary="Add a comment to a course",
     description="Add a new comment to a specific course.",
-    # responses={
-    #     201: {
-    #         "description": "Comment added successfully",
-    #         "model": CommentDetailResponse
-    #     },
-    #     400: {
-    #         "description": "Bad request",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Invalid input data"}
-    #             }
-    #         }
-    #     },
-    #     401: {
-    #         "description": "Unauthorized",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Missing or invalid token"}
-    #             }
-    #         }
-    #     },
-    #     404: {
-    #         "description": "Not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Course not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def add_comment(
     course_id: str,
@@ -89,21 +57,7 @@ async def add_comment(
     status_code=status.HTTP_200_OK,
     summary="Get course comments",
     description="Retrieve a paginated list of comments for a specific course.",
-    # responses={
-    #     200: {
-    #         "description": "Comments retrieved successfully",
-    #         "model": CommentListResponse
-    #     },
-    #     404: {
-    #         "description": "Course not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Course not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def get_course_comments(
     course_id: str,
@@ -133,21 +87,7 @@ async def get_course_comments(
     status_code=status.HTTP_200_OK,
     summary="Get user comments",
     description="Retrieve a paginated list of comments by the current user.",
-    # responses={
-    #     200: {
-    #         "description": "Comments retrieved successfully",
-    #         "model": CommentListResponse
-    #     },
-    #     401: {
-    #         "description": "Unauthorized",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Missing or invalid token"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def get_user_comments(
     page: int = 1,
@@ -180,21 +120,7 @@ async def get_user_comments(
     status_code=status.HTTP_200_OK,
     summary="Get comment by ID",
     description="Retrieve a specific comment by its ID.",
-    # responses={
-    #     200: {
-    #         "description": "Comment retrieved successfully",
-    #         "model": CommentDetailResponse
-    #     },
-    #     404: {
-    #         "description": "Comment not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Comment not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def get_comment(
     comment_id: str,
@@ -215,48 +141,7 @@ async def get_comment(
     status_code=status.HTTP_200_OK,
     summary="Update comment",
     description="Update a specific comment by its ID.",
-    # responses={
-    #     200: {
-    #         "description": "Comment updated successfully",
-    #         "model": CommentDetailResponse
-    #     },
-    #     400: {
-    #         "description": "Bad request",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Invalid input data"}
-    #             }
-    #         }
-    #     },
-    #     401: {
-    #         "description": "Unauthorized",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Missing or invalid token"}
-    #             }
-    #         }
-    #     },
-    #     403: {
-    #         "description": "Forbidden",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "You can only update your own comments"}
-    #             }
-    #         }
-    #     },
-    #     404: {
-    #         "description": "Not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Comment not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def update_comment(
     comment_id: str,
@@ -289,44 +174,7 @@ async def update_comment(
     status_code=status.HTTP_200_OK,
     summary="Delete comment",
     description="Delete a specific comment by its ID.",
-    # responses={
-    #     200: {
-    #         "description": "Comment deleted successfully",
-    #         "model": BaseResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Comment deleted successfully"}
-    #             }
-    #         }
-    #     },
-    #     401: {
-    #         "description": "Unauthorized",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Missing or invalid token"}
-    #             }
-    #         }
-    #     },
-    #     403: {
-    #         "description": "Forbidden",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "You can only delete your own comments"}
-    #             }
-    #         }
-    #     },
-    #     404: {
-    #         "description": "Not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Comment not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def delete_comment(
     comment_id: str,
@@ -362,39 +210,7 @@ review_router = APIRouter(
     status_code=status.HTTP_201_CREATED,
     summary="Add a review to a course",
     description="Add a new review with rating to a specific course.",
-    # responses={
-    #     201: {
-    #         "description": "Review added successfully",
-    #         "model": ReviewDetailResponse
-    #     },
-    #     400: {
-    #         "description": "Bad request",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "User has already reviewed this course"}
-    #             }
-    #         }
-    #     },
-    #     401: {
-    #         "description": "Unauthorized",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Missing or invalid token"}
-    #             }
-    #         }
-    #     },
-    #     404: {
-    #         "description": "Not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Course not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def add_review(
     course_id: str,
@@ -427,21 +243,7 @@ async def add_review(
     status_code=status.HTTP_200_OK,
     summary="Get course reviews",
     description="Retrieve a paginated list of reviews for a specific course.",
-    # responses={
-    #     200: {
-    #         "description": "Reviews retrieved successfully",
-    #         "model": ReviewListResponse
-    #     },
-    #     404: {
-    #         "description": "Course not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Course not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def get_course_reviews(
     course_id: str,
@@ -471,21 +273,7 @@ async def get_course_reviews(
     status_code=status.HTTP_200_OK,
     summary="Get user reviews",
     description="Retrieve a paginated list of reviews by the current user.",
-    # responses={
-    #     200: {
-    #         "description": "Reviews retrieved successfully",
-    #         "model": ReviewListResponse
-    #     },
-    #     401: {
-    #         "description": "Unauthorized",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Missing or invalid token"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def get_user_reviews(
     page: int = 1,
@@ -518,44 +306,7 @@ async def get_user_reviews(
     status_code=status.HTTP_200_OK,
     summary="Get user review for course",
     description="Retrieve the current user's review for a specific course.",
-    # responses={
-    #     200: {
-    #         "description": "Review retrieved successfully",
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {
-    #                     "detail": "User review retrieved successfully",
-    #                     "data": {
-    #                         "id": "123e4567-e89b-12d3-a456-426614174000",
-    #                         "rating": 5,
-    #                         "user_id": "123e4567-e89b-12d3-a456-426614174001",
-    #                         "course_id": "123e4567-e89b-12d3-a456-426614174002",
-    #                         "created_at": "2023-01-01T12:00:00Z",
-    #                         "updated_at": "2023-01-02T12:00:00Z"
-    #                     }
-    #                 }
-    #             }
-    #         }
-    #     },
-    #     401: {
-    #         "description": "Unauthorized",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Missing or invalid token"}
-    #             }
-    #         }
-    #     },
-    #     404: {
-    #         "description": "Not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Course not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def get_user_review_for_course(
     course_id: str,
@@ -585,21 +336,7 @@ async def get_user_review_for_course(
     status_code=status.HTTP_200_OK,
     summary="Get review by ID",
     description="Retrieve a specific review by its ID.",
-    # responses={
-    #     200: {
-    #         "description": "Review retrieved successfully",
-    #         "model": ReviewDetailResponse
-    #     },
-    #     404: {
-    #         "description": "Review not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Review not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def get_review(
     review_id: str,
@@ -620,48 +357,7 @@ async def get_review(
     status_code=status.HTTP_200_OK,
     summary="Update review",
     description="Update a specific review by its ID.",
-    # responses={
-    #     200: {
-    #         "description": "Review updated successfully",
-    #         "model": ReviewDetailResponse
-    #     },
-    #     400: {
-    #         "description": "Bad request",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Rating must be between 1 and 5"}
-    #             }
-    #         }
-    #     },
-    #     401: {
-    #         "description": "Unauthorized",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Missing or invalid token"}
-    #             }
-    #         }
-    #     },
-    #     403: {
-    #         "description": "Forbidden",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "You can only update your own reviews"}
-    #             }
-    #         }
-    #     },
-    #     404: {
-    #         "description": "Not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Review not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def update_review(
     review_id: str,
@@ -694,44 +390,7 @@ async def update_review(
     status_code=status.HTTP_200_OK,
     summary="Delete review",
     description="Delete a specific review by its ID.",
-    # responses={
-    #     200: {
-    #         "description": "Review deleted successfully",
-    #         "model": BaseResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Review deleted successfully"}
-    #             }
-    #         }
-    #     },
-    #     401: {
-    #         "description": "Unauthorized",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Missing or invalid token"}
-    #             }
-    #         }
-    #     },
-    #     403: {
-    #         "description": "Forbidden",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "You can only delete your own reviews"}
-    #             }
-    #         }
-    #     },
-    #     404: {
-    #         "description": "Not found",
-    #         "model": ErrorResponse,
-    #         "content": {
-    #             "application/json": {
-    #                 "example": {"detail": "Review not found"}
-    #             }
-    #         }
-    #     }
-    # }
+    
 )
 async def delete_review(
     review_id: str,

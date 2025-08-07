@@ -240,7 +240,7 @@ class PaymentService:
 
             attempt += 1
             if attempt < max_attempts:
-                time.sleep(3)
+                time.sleep(1.5)
 
 
         # Convert SQLAlchemy Enrollment object to Pydantic Response Model
